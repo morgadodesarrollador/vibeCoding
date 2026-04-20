@@ -10,6 +10,7 @@
 - Headers / navegación: Nordic
 - Tarjetas destacadas: Hint of Green
 - Texto principal: Nordic
+- Titulos en negrita
 
 # Tipografía
 
