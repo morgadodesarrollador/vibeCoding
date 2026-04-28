@@ -12,16 +12,22 @@ export default function FeaturedCard({ property }: FeaturedCardProps) {
   const favorite = isFavorite(property.id);
 
   return (
-    <div className="group relative rounded-xl overflow-hidden shadow-soft bg-white dark:bg-white/5 cursor-pointer">
-      <div className="aspect-[4/3] w-full overflow-hidden relative">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          alt={property.image_alt}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-          src={property.image}
-        />
+    <div className="group relative rounded-2xl overflow-hidden h-[420px] shadow-xl cursor-pointer">
+      {/* Imagen de fondo */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        alt={property.image_alt}
+        className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+        src={property.image}
+      />
+
+      {/* Gradiente superpuesto para garantizar la legibilidad */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10 pointer-events-none transition-opacity duration-500 group-hover:opacity-90" />
+
+      {/* Etiquetas superiores */}
+      <div className="absolute top-5 inset-x-5 flex justify-between items-start z-10">
         {property.status && (
-          <div className="absolute top-4 left-4 bg-white/90 dark:bg-black/80 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider text-nordic-dark dark:text-white">
+          <div className="bg-white/20 backdrop-blur-md border border-white/20 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-widest text-white shadow-sm">
             {property.status}
           </div>
         )}
@@ -30,43 +36,49 @@ export default function FeaturedCard({ property }: FeaturedCardProps) {
             e.stopPropagation();
             toggleFavorite(property.id);
           }}
-          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center text-nordic-dark hover:bg-mosque hover:text-white transition-all z-10"
+          className="w-11 h-11 rounded-full bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white hover:text-mosque transition-all shadow-sm"
         >
           <span className="material-icons text-xl">
             {favorite ? "favorite" : "favorite_border"}
           </span>
         </button>
-        <div className="absolute bottom-0 inset-x-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent opacity-60 pointer-events-none" />
       </div>
 
-      <div className="p-6 relative">
-        <div className="flex justify-between items-start mb-2">
-          <div>
-            <h3 className="text-xl font-medium text-nordic-dark dark:text-white group-hover:text-mosque transition-colors">
-              {property.title}
-            </h3>
-            <p className="text-nordic-muted text-sm flex items-center gap-1 mt-1">
-              <span className="material-icons text-sm">place</span>
-              {property.location}
-            </p>
+      {/* Contenido inferior (Glassmorphism) */}
+      <div className="absolute bottom-5 inset-x-5 z-10 transform transition-transform duration-500 translate-y-2 group-hover:translate-y-0">
+        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 shadow-2xl">
+          <div className="flex justify-between items-end mb-4">
+            <div>
+              <p className="text-white/80 text-sm flex items-center gap-1.5 mb-1.5 font-medium tracking-wide">
+                <span className="material-icons text-[16px]">place</span>
+                {property.location}
+              </p>
+              <h3 className="text-2xl font-semibold text-white leading-tight">
+                {property.title}
+              </h3>
+            </div>
+            <div className="text-right">
+              <span className="block text-white/80 text-xs uppercase tracking-wider mb-1">Precio</span>
+              <span className="text-xl font-bold text-white">
+                {property.price}
+              </span>
+            </div>
           </div>
-          <span className="text-xl font-semibold text-mosque dark:text-primary">
-            {property.price}
-          </span>
-        </div>
 
-        <div className="flex items-center gap-6 mt-6 pt-6 border-t border-nordic-dark/5 dark:border-white/10">
-          <div className="flex items-center gap-2 text-nordic-muted text-sm">
-            <span className="material-icons text-lg">king_bed</span>
-            {property.beds} Hab.
-          </div>
-          <div className="flex items-center gap-2 text-nordic-muted text-sm">
-            <span className="material-icons text-lg">bathtub</span>
-            {property.baths} Baños
-          </div>
-          <div className="flex items-center gap-2 text-nordic-muted text-sm">
-            <span className="material-icons text-lg">square_foot</span>
-            {property.area}
+          {/* Detalles */}
+          <div className="flex items-center gap-6 pt-4 border-t border-white/20 text-white">
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <span className="material-icons text-white/80">king_bed</span>
+              {property.beds} Hab
+            </div>
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <span className="material-icons text-white/80">bathtub</span>
+              {property.baths} Baños
+            </div>
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <span className="material-icons text-white/80">square_foot</span>
+              {property.area}
+            </div>
           </div>
         </div>
       </div>
