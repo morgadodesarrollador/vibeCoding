@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useSyncExternalStore } from "react";
 
 interface FavoritesContextType {
   favorites: string[];
@@ -10,43 +10,69 @@ interface FavoritesContextType {
 
 const FavoritesContext = createContext<FavoritesContextType | undefined>(undefined);
 
-export function FavoritesProvider({ children }: { children: React.ReactNode }) {
-  const [favorites, setFavorites] = useState<string[]>([]);
-  const [mounted, setMounted] = useState(false);
+const FAVORITES_KEY = "luxe-estate-favorites";
+const FAVORITES_EVENT = "luxe-estate-favorites-change";
+const EMPTY_FAVORITES: string[] = [];
+let cachedRaw: string | null = null;
+let cachedFavorites: string[] = [];
 
-  useEffect(() => {
-    setMounted(true);
-    const saved = localStorage.getItem("luxe-estate-favorites");
-    if (saved) {
-      try {
-        setFavorites(JSON.parse(saved));
-      } catch (e) {
-        console.error("Failed to parse favorites", e);
-      }
-    }
-  }, []);
+function getFavoritesSnapshot() {
+  if (typeof window === "undefined") return EMPTY_FAVORITES;
+
+  const raw = localStorage.getItem(FAVORITES_KEY);
+  if (raw === cachedRaw) return cachedFavorites;
+
+  cachedRaw = raw;
+  if (!raw) {
+    cachedFavorites = [];
+    return cachedFavorites;
+  }
+
+  try {
+    const parsed = JSON.parse(raw);
+    cachedFavorites = Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    console.error("Failed to parse favorites", error);
+    cachedFavorites = [];
+  }
+
+  return cachedFavorites;
+}
+
+function subscribeFavorites(callback: () => void) {
+  window.addEventListener("storage", callback);
+  window.addEventListener(FAVORITES_EVENT, callback);
+
+  return () => {
+    window.removeEventListener("storage", callback);
+    window.removeEventListener(FAVORITES_EVENT, callback);
+  };
+}
+
+function emitFavoritesChange() {
+  window.dispatchEvent(new Event(FAVORITES_EVENT));
+}
+
+export function FavoritesProvider({ children }: { children: React.ReactNode }) {
+  const favorites = useSyncExternalStore(
+    subscribeFavorites,
+    getFavoritesSnapshot,
+    () => EMPTY_FAVORITES
+  );
 
   const toggleFavorite = (id: string) => {
-    setFavorites((prev) => {
-      const isFav = prev.includes(id);
-      const newFavs = isFav ? prev.filter((fav) => fav !== id) : [...prev, id];
-      localStorage.setItem("luxe-estate-favorites", JSON.stringify(newFavs));
-      return newFavs;
-    });
+    const isFav = favorites.includes(id);
+    const newFavs = isFav ? favorites.filter((fav) => fav !== id) : [...favorites, id];
+
+    localStorage.setItem(FAVORITES_KEY, JSON.stringify(newFavs));
+    cachedRaw = JSON.stringify(newFavs);
+    cachedFavorites = newFavs;
+    emitFavoritesChange();
   };
 
   const isFavorite = (id: string) => {
     return favorites.includes(id);
   };
-
-  // Prevent hydration mismatch by not exposing real values until mounted
-  if (!mounted) {
-    return (
-      <FavoritesContext.Provider value={{ favorites: [], toggleFavorite: () => {}, isFavorite: () => false }}>
-        {children}
-      </FavoritesContext.Provider>
-    );
-  }
 
   return (
     <FavoritesContext.Provider value={{ favorites, toggleFavorite, isFavorite }}>

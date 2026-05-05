@@ -84,7 +84,7 @@ export default async function Home(props: {
         )}
 
         {/* Nuevo en el Mercado */}
-        <section>
+        <section id="listado">
           <div className="flex items-end justify-between mb-8">
             <div>
               <h2 className="text-2xl font-light text-nordic-dark dark:text-white">
